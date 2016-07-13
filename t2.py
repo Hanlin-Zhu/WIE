@@ -6,7 +6,14 @@ import Image
 import webbrowser as wb
 import time
 import os
-para={'Name':'Parameters'}
+parameter_servers = ["pc-1:2222"]
+workers = [	"pc-2:2222", 
+			"pc-3:2222",
+			"pc-4:2222"]
+cluster = tf.train.ClusterSpec({"ps":parameter_servers, "worker":workers})
+
+para={'Name':'cluster'}
+para={'cluster':'cluster'}
 para['TrainSample']=[1,2]# use 1.bmp to 5.bmp as training images
 para['TestSample']=[3,4]# use 6.bmp to 8.bmp as test images
 para['height']=700
@@ -32,6 +39,11 @@ para['epoch']=2;
 para['n_Input'] = para['new_height']*para['new_width']
 para['Hidden_Input_Fac']=2
 para['n_Hidden']= para['n_Input']*para['Hidden_Input_Fac']
+
+tf.app.flags.DEFINE_string("job_name", "", "Either 'ps' or 'worker'")
+tf.app.flags.DEFINE_integer("task_index", 0, "Index of task within the job")
+FLAGS = tf.app.flags.FLAGS
+para['FLAGS']=FLAGS
 
 Input=FS_2.ImportControl(para,para['TrainSample'][0],para['TrainSample'][1],1)
 Desired_Input=FS_2.ImportControl(para,para['TrainSample'][0],para['TrainSample'][1],0)
@@ -63,9 +75,9 @@ Layer=2;
 WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict)
 
 #------------------------------- Second Layer Trained -------------------------------------
-para['l_rate']=0.0001;
-para['lam']=0;
-WeightDict,BiasDict,BiasPrimeDict=FS_2.JointTrain(para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,BiasPrimeDict)
+#para['l_rate']=0.0001;
+#para['lam']=0;
+#WeightDict,BiasDict,BiasPrimeDict=FS_2.JointTrain(para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,BiasPrimeDict)
 #------------------------------- Joint Training Finished -------------------------------------
 
 #_________________________________Assume that all training are finished,How do we evaluate___________
