@@ -160,9 +160,9 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
             train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
 
     
-
-        init_op = tf.initialize_all_variables()
-        print("Variables initialized ...")
+        
+            init_op = tf.initialize_all_variables()
+            print("Variables initialized ...")
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
 														global_step=global_step,
 														init_op=init_op)
