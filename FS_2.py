@@ -1,10 +1,9 @@
 #Fucntion 1, section the image into pathces
 import numpy as np
 import Image
-import webbrowser as wb
-
-
-
+from __future__ import print_function
+import sys
+    
 
 def sigmoid(inX):
     return 1.0/(1+np.exp(-inX))
@@ -99,7 +98,7 @@ def ImgComb(para,Input):
 def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
     import tensorflow as tf
     import numpy as np
-
+    
     batchSize=para['batchSize'] 
     lam=para['lam']; # this is the parameter multiplying the Frobenius norm (squared) of Weight Matrix, since tied weights are used. we would forget the 1/2 multiplyer
     p_act=para['p_act']; # this is the parameter used in calculating the KL distance of mean activation of hidden layer. 
@@ -109,78 +108,100 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
     n_Output= n_Input
     epoch=para['epoch']
     percentTrain=para['percentTrain']
-  # add gaussian white noise.
-# One layer of hidden Units currently Assumed, Multi-Layer (Stacked autoencoder) may be added in the future. 
-# The number of hidden units in this layer is a factor multiple of the number of input units. 
+    FLAGS=para['FLAGS']
+    
+    
+    server = tf.train.Server(cluster,job_name=FLAGS.job_name,task_index=FLAGS.task_index)
+    if FLAGS.job_name == "ps":
+        server.join()
+    elif FLAGS.job_name == "worker":
 
-    X = tf.placeholder("float",[None,n_Input],name='X')
-    XD = tf.placeholder("float",[None,n_Input],name='XD')
+	# Between-graph replication
+	    with tf.device(tf.train.replica_device_setter(
+	    worker_device="/job:worker/task:%d" % FLAGS.task_index,
+		cluster=cluster)):
+		    
+		    global_step = tf.get_variable('global_step', [],initializer = tf.constant_initializer(0),trainable = False)
+            # add gaussian white noise.
+            # One layer of hidden Units currently Assumed, Multi-Layer (Stacked autoencoder) may be added in the future. 
+            # The number of hidden units in this layer is a factor multiple of the number of input units. 
+
+            X = tf.placeholder("float",[None,n_Input],name='X')
+            XD = tf.placeholder("float",[None,n_Input],name='XD')
 
 
-    W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
-    W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
+            W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
+            W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
                           minval=-W_init_max,
                           maxval=W_init_max)
 
-    W = tf.Variable(W_init,name='W')
-    b = tf.Variable(tf.zeros([n_Hidden]),name='b')
+            W = tf.Variable(W_init,name='W')
+            b = tf.Variable(tf.zeros([n_Hidden]),name='b')
 
-    W_prime = tf.transpose (W)
-    b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
-    def model(X,W,b,W_prime,b_prime):
+            W_prime = tf.transpose (W)
+            b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
+            def model(X,W,b,W_prime,b_prime):
         
-        Y = tf.nn.sigmoid(tf.matmul(X,W) +b)
-        Z = tf.nn.sigmoid(tf.matmul(Y,W_prime)+b_prime)
+                Y = tf.nn.sigmoid(tf.matmul(X,W) +b)
+                Z = tf.nn.sigmoid(tf.matmul(Y,W_prime)+b_prime)
    
-        return Y,Z
-    Y,Z = model(X,W,b,W_prime,b_prime);
+                return Y,Z
+            Y,Z = model(X,W,b,W_prime,b_prime);
 
-    HMA= tf.reduce_sum(Y)/n_Hidden #hidden layer's Mean Activation
+            HMA= tf.reduce_sum(Y)/n_Hidden #hidden layer's Mean Activation
 
-    cost1 = tf.reduce_sum(tf.pow(XD-Z,2)/2/batchSize) # Mean squared error cost
-    cost1m = tf.reduce_mean(tf.pow(XD-Z,2))
-    cost2 = tf.reduce_sum(lam*tf.pow(W,2)/2);  # Weight regularization cost
-    cost3 =  p_act*tf.log(p_act/HMA)+(1-p_act)*tf.log((1-p_act)/(1-HMA)) # KL distance cost
+            cost1 = tf.reduce_sum(tf.pow(XD-Z,2)/2/batchSize) # Mean squared error cost
+            cost1m = tf.reduce_mean(tf.pow(XD-Z,2))
+            cost2 = tf.reduce_sum(lam*tf.pow(W,2)/2);  # Weight regularization cost
+            cost3 =  p_act*tf.log(p_act/HMA)+(1-p_act)*tf.log((1-p_act)/(1-HMA)) # KL distance cost
 
-    cost=cost1+cost2+cost3;	
+            cost=cost1+cost2+cost3;	
 
-    train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
+            train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
 
-    sess = tf.Session()
+    
 
-    init = tf.initialize_all_variables()
-
-    sess.run(init)
-
-    def feedData(Loc,la,lb,RawData,Layer):
-        Output=np.zeros((lb-la,n_Input))
-        for i in range(lb-la):
+        init_op = tf.initialize_all_variables()
+        print("Variables initialized ...")
+        sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
+														global_step=global_step,
+														init_op=init_op)
+		begin_time = time.time()
+	    frequency = 100
+	    with sv.prepare_or_wait_for_session(server.target) as sess:
+	        
+            def feedData(Loc,la,lb,RawData,Layer):
+                Output=np.zeros((lb-la,n_Input))
+                for i in range(lb-la):
            # print [Loc[i+la,0],Loc[i+la,1],Loc[i+la,2],Loc[i+la,3],Loc[i+la,4]]
-            patch=RawData[int(Loc[i+la,0]),int(Loc[i+la,1]):int(Loc[i+la,2]),int(Loc[i+la,3]):int(Loc[i+la,4])]
-            Y=patch.reshape(1,patch.shape[0]*patch.shape[1])
-            for j in range (Layer-1):
-                Y = sigmoid(np.matmul(Y,WeightDict[j]) +BiasDict[j])    
-            Output[i]=Y
-        return Output 
+                    patch=RawData[int(Loc[i+la,0]),int(Loc[i+la,1]):int(Loc[i+la,2]),int(Loc[i+la,3]):int(Loc[i+la,4])]
+                    Y=patch.reshape(1,patch.shape[0]*patch.shape[1])
+                    for j in range (Layer-1):
+                        Y = sigmoid(np.matmul(Y,WeightDict[j]) +BiasDict[j])    
+                    Output[i]=Y
+                return Output 
 
-    batchTotal=Loc.shape[0]/batchSize;
-    print "batchTotal:"+str(batchTotal)
-    print "epochs:"+str(para['epoch'])
-    print "percentTrain:"+str(para['percentTrain'])#!!!!!!!!!!!!!! THIS PARAMETER ALSO HEAVILY CONTROLS THE SINGLE BATCH TRAINING TIME.
+            batchTotal=Loc.shape[0]/batchSize;
+            print "batchTotal:"+str(batchTotal)
+            print "epochs:"+str(para['epoch'])
+            print "percentTrain:"+str(para['percentTrain'])#!!!!!!!!!!!!!! THIS PARAMETER ALSO HEAVILY CONTROLS THE SINGLE BATCH TRAINING TIME.
 
 
-    TestIn=feedData(Loc,int(batchTotal*percentTrain)*batchSize,Loc.shape[0],Input,Layer)
-    TestDesired=feedData(Loc,int(batchTotal*percentTrain)*batchSize,Loc.shape[0],Desired_Input,Layer)                              
-    for j in range(epoch):   # Do this training for x epochs 
+            TestIn=feedData(Loc,int(batchTotal*percentTrain)*batchSize,Loc.shape[0],Input,Layer)
+            TestDesired=feedData(Loc,int(batchTotal*percentTrain)*batchSize,Loc.shape[0],Desired_Input,Layer)                              
+            for j in range(epoch):   # Do this training for x epochs 
         
-        totalIter= epoch*int(batchTotal*percentTrain)
-        for i in range(int(batchTotal*percentTrain)):   # batchSize =, 80% batches as training set, the last 20% batches as validation set,
+                totalIter= epoch*int(batchTotal*percentTrain)
+                for i in range(int(batchTotal*percentTrain)):   # batchSize =, 80% batches as training set, the last 20% batches as validation set,
 
-            sess.run(train_op, feed_dict=({X:feedData(Loc,i*batchSize,(i+1)*batchSize,Input,Layer),XD:feedData(Loc,i*batchSize,(i+1)*batchSize,Desired_Input,Layer)}))
+                    sess.run(train_op, feed_dict=({X:feedData(Loc,i*batchSize,(i+1)*batchSize,Input,Layer),XD:feedData(Loc,i*batchSize,(i+1)*batchSize,Desired_Input,Layer)}))
             
-            perform=sess.run(cost1m, feed_dict=({X:TestIn,XD:TestDesired}))
-            progress=j*int(batchTotal*percentTrain)+i
-            print str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]"
+                    perform=sess.run(cost1m, feed_dict=({X:TestIn,XD:TestDesired}))
+                    progress=j*int(batchTotal*percentTrain)+i
+                    print str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]"
+        sess.close()
+        sv.stop()
+	    print("done")
 
     W_final=sess.run(W)
     b_final=sess.run(b)
