@@ -118,7 +118,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
 
 	# Between-graph replication
 	    with tf.device(tf.train.replica_device_setter(worker_device="/job:worker/task:%d" % FLAGS.task_index,cluster=cluster)):
-	            global_step = tf.get_variable('global_step', [],initializer = tf.constant_initializer(0),trainable = False)
+	        global_step = tf.get_variable('global_step', [],initializer = tf.constant_initializer(0),trainable = False)
             # add gaussian white noise.
             # One layer of hidden Units currently Assumed, Multi-Layer (Stacked autoencoder) may be added in the future. 
             # The number of hidden units in this layer is a factor multiple of the number of input units. 
@@ -162,7 +162,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
                 print("Variables initialized ...")
                 
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),global_step=global_step,nit_op=init_op)
-		begin_time = time.time()
+	    begin_time = time.time()
 	    frequency = 100
 	    with sv.prepare_or_wait_for_session(server.target) as sess:
 	        
