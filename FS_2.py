@@ -121,51 +121,50 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
 	    worker_device="/job:worker/task:%d" % FLAGS.task_index,
 		cluster=cluster)):
 		    
-		    global_step = tf.get_variable('global_step', [],initializer = tf.constant_initializer(0),trainable = False)
+		        global_step = tf.get_variable('global_step', [],initializer = tf.constant_initializer(0),trainable = False)
             # add gaussian white noise.
             # One layer of hidden Units currently Assumed, Multi-Layer (Stacked autoencoder) may be added in the future. 
             # The number of hidden units in this layer is a factor multiple of the number of input units. 
 
-            X = tf.placeholder("float",[None,n_Input],name='X')
-            XD = tf.placeholder("float",[None,n_Input],name='XD')
+                X = tf.placeholder("float",[None,n_Input],name='X')
+                XD = tf.placeholder("float",[None,n_Input],name='XD')
 
 
-            W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
-            W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
+                W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
+                W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
                           minval=-W_init_max,
                           maxval=W_init_max)
 
-            W = tf.Variable(W_init,name='W')
-            b = tf.Variable(tf.zeros([n_Hidden]),name='b')
+                W = tf.Variable(W_init,name='W')
+                b = tf.Variable(tf.zeros([n_Hidden]),name='b')
 
-            W_prime = tf.transpose (W)
-            b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
-            def model(X,W,b,W_prime,b_prime):
+                W_prime = tf.transpose (W)
+                b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
+                def model(X,W,b,W_prime,b_prime):
         
-                Y = tf.nn.sigmoid(tf.matmul(X,W) +b)
-                Z = tf.nn.sigmoid(tf.matmul(Y,W_prime)+b_prime)
+                    Y = tf.nn.sigmoid(tf.matmul(X,W) +b)
+                    Z = tf.nn.sigmoid(tf.matmul(Y,W_prime)+b_prime)
    
-                return Y,Z
-            Y,Z = model(X,W,b,W_prime,b_prime);
+                    return Y,Z
+                Y,Z = model(X,W,b,W_prime,b_prime);
 
-            HMA= tf.reduce_sum(Y)/n_Hidden #hidden layer's Mean Activation
+                HMA= tf.reduce_sum(Y)/n_Hidden #hidden layer's Mean Activation
 
-            cost1 = tf.reduce_sum(tf.pow(XD-Z,2)/2/batchSize) # Mean squared error cost
-            cost1m = tf.reduce_mean(tf.pow(XD-Z,2))
-            cost2 = tf.reduce_sum(lam*tf.pow(W,2)/2);  # Weight regularization cost
-            cost3 =  p_act*tf.log(p_act/HMA)+(1-p_act)*tf.log((1-p_act)/(1-HMA)) # KL distance cost
+                cost1 = tf.reduce_sum(tf.pow(XD-Z,2)/2/batchSize) # Mean squared error cost
+                cost1m = tf.reduce_mean(tf.pow(XD-Z,2))
+                cost2 = tf.reduce_sum(lam*tf.pow(W,2)/2);  # Weight regularization cost
+                cost3 =  p_act*tf.log(p_act/HMA)+(1-p_act)*tf.log((1-p_act)/(1-HMA)) # KL distance cost
 
-            cost=cost1+cost2+cost3;	
+                cost=cost1+cost2+cost3;	
 
-            train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
+                train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
 
     
         
-            init_op = tf.initialize_all_variables()
-            print("Variables initialized ...")
-        sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
-														global_step=global_step,
-														init_op=init_op)
+                init_op = tf.initialize_all_variables()
+                print("Variables initialized ...")
+                
+        sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),global_step=global_step,nit_op=init_op)
 		begin_time = time.time()
 	    frequency = 100
 	    with sv.prepare_or_wait_for_session(server.target) as sess:
