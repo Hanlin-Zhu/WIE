@@ -6,6 +6,7 @@ import Image
 import webbrowser as wb
 import time
 import os
+import tensorflow as tf
 parameter_servers = ["pc-1:2222"]
 workers = [	"pc-2:2222", 
 			"pc-3:2222",
