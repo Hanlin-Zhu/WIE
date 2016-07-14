@@ -199,13 +199,14 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
                         progress=j*int(batchTotal*percentTrain)+i
                         print(str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
 
+        W_final=sess.run(W)
+        b_final=sess.run(b)
+        bp_final=sess.run(b_prime)
         sv.stop()
-    print("done")
+        print("done")
 
-    W_final=sess.run(W)
-    b_final=sess.run(b)
-    bp_final=sess.run(b_prime)
-    sess.close()
+
+        sess.close()
     return W_final,b_final,bp_final
 
 
