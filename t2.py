@@ -65,7 +65,7 @@ BiasPrimeDict={'Name':'Bias_Prime_Dict'}
 
 #-------------------------------  Start Training  -------------------------------------
 Layer=1;
-WeightDict[0],BiasDict[0],BiasPrimeDict[0]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict)
+WeightDict[0],BiasDict[0],BiasPrimeDict[0]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict,1)
 
 
 #------------------------------- First Layer Trained -------------------------------------
@@ -73,7 +73,7 @@ para['n_Input']=para['n_Hidden']
 para['n_Hidden']=para['n_Hidden']*para['Hidden_Input_Fac']
 
 Layer=2;
-WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict)
+WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict,0)
 
 #------------------------------- Second Layer Trained -------------------------------------
 #para['l_rate']=0.0001;

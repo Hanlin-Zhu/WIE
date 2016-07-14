@@ -95,7 +95,7 @@ def ImgComb(para,Input):
 
 
 
-def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
+def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,serverCreate):
     import tensorflow as tf
     import numpy as np
     
@@ -110,8 +110,8 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
     percentTrain=para['percentTrain']
     FLAGS=para['FLAGS']
     cluster=para['cluster']    
-    
-    server = tf.train.Server(cluster,job_name=FLAGS.job_name,task_index=FLAGS.task_index)
+    if serverCreate == 1:
+        server = tf.train.Server(cluster,job_name=FLAGS.job_name,task_index=FLAGS.task_index)
     if FLAGS.job_name == "ps":
         server.join()
     elif FLAGS.job_name == "worker":
@@ -206,7 +206,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
         print("done")
 
 
-        
+
     return W_final,b_final,bp_final
 
 
