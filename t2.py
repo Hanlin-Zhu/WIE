@@ -14,7 +14,7 @@ workers = [	"pc-2:2222",
 cluster = tf.train.ClusterSpec({"ps":parameter_servers, "worker":workers})
 
 para={'Name':'cluster'}
-para={'cluster':'cluster'}
+para={'cluster':cluster}
 para['TrainSample']=[1,2]# use 1.bmp to 5.bmp as training images
 para['TestSample']=[3,4]# use 6.bmp to 8.bmp as test images
 para['height']=700
