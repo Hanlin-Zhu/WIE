@@ -113,6 +113,8 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
     
     server = tf.train.Server(cluster,job_name=FLAGS.job_name,task_index=FLAGS.task_index)
     if FLAGS.job_name == "ps":
+        server.join()
+    elif FLAGS.job_name == "worker":
         with tf.device("job:ps/task:0"):
             W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
             W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
@@ -124,8 +126,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
                                       
             W_prime = tf.transpose (W)
             b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
-        server.join()
-    elif FLAGS.job_name == "worker":
+
 
     # Between-graph replication
         with tf.device(tf.train.replica_device_setter(worker_device="/job:worker/task:%d" % FLAGS.task_index,cluster=cluster)):
