@@ -113,6 +113,17 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
     
     server = tf.train.Server(cluster,job_name=FLAGS.job_name,task_index=FLAGS.task_index)
     if FLAGS.job_name == "ps":
+        with tf.device("job:ps/task:0"):
+            W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
+            W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
+                                      minval=-W_init_max,
+                                      maxval=W_init_max)
+                
+            W = tf.Variable(W_init,name='W')
+            b = tf.Variable(tf.zeros([n_Hidden]),name='b')
+                                      
+            W_prime = tf.transpose (W)
+            b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
         server.join()
     elif FLAGS.job_name == "worker":
 
@@ -127,16 +138,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
             XD = tf.placeholder("float",[None,n_Input],name='XD')
 
 
-            W_init_max = 4*np.sqrt(6. / (n_Input+n_Hidden)) # A convention used by deep learning society.
-            W_init= tf.random_uniform(shape=[n_Input,n_Hidden],
-                          minval=-W_init_max,
-                          maxval=W_init_max)
 
-            W = tf.Variable(W_init,name='W')
-            b = tf.Variable(tf.zeros([n_Hidden]),name='b')
-
-            W_prime = tf.transpose (W)
-            b_prime = tf.Variable(tf.zeros([n_Output]),name='b_prime')
             def model(X,W,b,W_prime,b_prime):
         
                 Y = tf.nn.sigmoid(tf.matmul(X,W) +b)
@@ -195,7 +197,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict):
                         perform=sess.run(cost1m, feed_dict=({X:TestIn,XD:TestDesired}))
                         progress=j*int(batchTotal*percentTrain)+i
                         print(str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
-        sess.close()
+
         sv.stop()
     print("done")
 
