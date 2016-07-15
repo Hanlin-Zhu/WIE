@@ -76,3 +76,5 @@ https://www.tensorflow.org/versions/r0.9/how_tos/distributed/index.html#replicat
 
 3.     Xie, J., Xu, L., & Chen, E. (2012). Image denoising and inpainting with deep neural networks. In Advances in Neural Information Processing Systems (pp. 341-349).
 
+4.      Nlintz 的autoencoder tutorial on github
+https://github.com/nlintz/TensorFlow-Tutorials/blob/master/06_autoencoder.py
