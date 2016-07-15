@@ -66,9 +66,9 @@ Loc_overlap参数中,以后根据这个参数再切出每个训练batch所需的
 ``` gcloud compute instances start pc-1 pc-2 pc-3 pc-4```来唤醒就可以。
 
 4. 测试的结果会保存在result文件夹中。 G,C,R字母分别代表good(原始训练图片）,corrupted(加入了噪音的图片），reconstructed （把corrupted 的图片切小块以后通过DAE，然后在在每个去噪后的小片拼起来，小片之间overlap的部分对pixel intensity取平均）
-主要的参考：
 
 
+#主要的参考：
 
 官方文档
 https://www.tensorflow.org/versions/r0.9/how_tos/distributed/index.html#replicated-training
