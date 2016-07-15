@@ -1,4 +1,4 @@
-# DAE
+# Denoising Auto Encoder 
 # Distributed Tensorflow Example on Google Cloud Platform (GCE)
 
 Using data parallelism with shared model parameters while updating parameters asynchronous. See comment for some changes to make the parameter updates synchronous 
