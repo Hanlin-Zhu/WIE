@@ -70,14 +70,13 @@ Loc_overlap参数中,以后根据这个参数再切出每个训练batch所需的
 
 
 
-1.	官方文档
+官方文档
 https://www.tensorflow.org/versions/r0.9/how_tos/distributed/index.html#replicated-training
 
-2.	Imanol Schlag的simple mnist 在github 上的例子
+Imanol Schlag的simple mnist 在github 上的例子
 https://github.com/ischlag/distributed-tensorflow-example
 
-3.     Xie, J., Xu, L., & Chen, E. (2012). Image denoising and inpainting with deep neural networks. In Advances in Neural Information Processing Systems (pp. 341-349).
-
-
-4.   Nlintz 的autoencoder tutorial on github
+Nlintz 的autoencoder tutorial on github
 https://github.com/nlintz/TensorFlow-Tutorials/blob/master/06_autoencoder.py
+
+Xie, J., Xu, L., & Chen, E. (2012). Image denoising and inpainting with deep neural networks. In Advances in Neural Information Processing Systems (pp. 341-349).
