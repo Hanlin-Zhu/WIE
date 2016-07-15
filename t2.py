@@ -139,7 +139,7 @@ PSNR_Rec=10*np.log10((255.**2)/(255.**2)/np.mean(np.power((Desired_Input-Recon),
 print(PSNR_Rec)
 
 #PSNR REPORT COMPLETE__________________________________________
-savePath="/result/"+time.strftime("20%y-%m-%d--%H:%M:%S")
+savePath="result/"+time.strftime("20%y-%m-%d--%H:%M:%S")
 os.mkdir(savePath)
 fileType="BMP"
 for j in range(Input.shape[0]): 

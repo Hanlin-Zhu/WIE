@@ -197,7 +197,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,serverCre
             
                         perform=sess.run(cost1m, feed_dict=({X:TestIn,XD:TestDesired}))
                         progress=j*int(batchTotal*percentTrain)+i
-                        print("Global Step: %d  ," % (step+1), str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
+                        print("Global Step: %d  ," % (step), str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
 
                 W_final=sess.run(W)
                 b_final=sess.run(b)
