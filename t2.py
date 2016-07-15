@@ -29,7 +29,7 @@ para['stride_width']=70
 
 para['Rstride_height']=70
 para['Rstride_width']=70
-para['LayerSize']=2 #number of Hidden Layers
+para['LayerSize']=1 #number of Hidden Layers
 para['percentTrain']=0.85 #!!!!!!!!!!!!!! THIS PARAMETER ALSO HEAVILY CONTROLS THE SINGLE BATCH TRAINING TIME.
 para['cor']=0.1
 para['batchSize']=50
@@ -69,11 +69,11 @@ WeightDict[0],BiasDict[0],BiasPrimeDict[0]=FS_2.LayerTrain(para,Loc_overlap,Inpu
 
 
 #------------------------------- First Layer Trained -------------------------------------
-para['n_Input']=para['n_Hidden']
-para['n_Hidden']=para['n_Hidden']*para['Hidden_Input_Fac']
+#para['n_Input']=para['n_Hidden']
+#para['n_Hidden']=para['n_Hidden']*para['Hidden_Input_Fac']
 
-Layer=2;
-WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict,0)
+#Layer=2;
+#WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Input,Desired_Input,Layer,WeightDict,BiasDict,0)
 
 #------------------------------- Second Layer Trained -------------------------------------
 #para['l_rate']=0.0001;
@@ -84,7 +84,7 @@ WeightDict[1],BiasDict[1],BiasPrimeDict[1]=FS_2.LayerTrain(para,Loc_overlap,Inpu
 #_________________________________Assume that all training are finished,How do we evaluate___________
 
 
-# N hidden layers in total   only supports 2 layers now
+# N hidden layers in total only supports 2 layers now
 
 def model_Joint(X,LayerSize,WeightDict,BiasDict,BiasPrimeDict):
     Y=X

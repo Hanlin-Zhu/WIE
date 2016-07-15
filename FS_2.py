@@ -157,7 +157,7 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,serverCre
 
             cost=cost1+cost2+cost3; 
 
-            train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost)
+            train_op = tf.train.GradientDescentOptimizer(l_rate).minimize(cost,global_step=global_step)
 
     
         
@@ -193,11 +193,11 @@ def LayerTrain (para,Loc,Input,Desired_Input,Layer,WeightDict,BiasDict,serverCre
                     totalIter= epoch*int(batchTotal*percentTrain)
                     for i in range(int(batchTotal*percentTrain)):   # batchSize =, 80% batches as training set, the last 20% batches as validation set,
 
-                        sess.run(train_op, feed_dict=({X:feedData(Loc,i*batchSize,(i+1)*batchSize,Input,Layer),XD:feedData(Loc,i*batchSize,(i+1)*batchSize,Desired_Input,Layer)}))
+                        _,step=sess.run([train_op,global_step], feed_dict=({X:feedData(Loc,i*batchSize,(i+1)*batchSize,Input,Layer),XD:feedData(Loc,i*batchSize,(i+1)*batchSize,Desired_Input,Layer)}))
             
                         perform=sess.run(cost1m, feed_dict=({X:TestIn,XD:TestDesired}))
                         progress=j*int(batchTotal*percentTrain)+i
-                        print(str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
+                        print("Global Step: %d  ," % (step+1), str(perform)+"["+str(progress+1)+"/"+str(totalIter)+"]")
 
                 W_final=sess.run(W)
                 b_final=sess.run(b)
