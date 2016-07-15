@@ -31,7 +31,7 @@ Step 6. clone this directory
 ```
    git clone https://github.com/Hanlin-Zhu/WIE.git
 ```
-
+这一步主要是在每一台机器上加载代码和训练数据集（下载WIE这个folder)，其实不一定用github, 我只是觉得这样比较方便。
 Step 7. Repeat Step 4 and 6 for all the other three virtual machines
 
 Step 8. Access each machine through SSH connect and run the corresponding example.py, the program won't start and may either freeze or raise connection failed error until you have run the program on all machines. 
@@ -49,6 +49,14 @@ pc-04$ cd WIE
 pc-04$ python t2.py --job_name="worker" --task_index=2 
 
 ```
+
+主要的参考：
+
+1.	官方文档
+https://www.tensorflow.org/versions/r0.9/how_tos/distributed/index.html#replicated-training
+
+2.	Imanol Schlag的simple mnist 在github 上的例子
+ https://github.com/ischlag/distributed-tensorflow-example
 
 
 
