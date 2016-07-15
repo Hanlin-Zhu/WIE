@@ -1,9 +1,12 @@
 # Denoising Auto Encoder 
 # Distributed Tensorflow Example on Google Cloud Platform (GCE)
 
-Using data parallelism with shared model parameters while updating parameters asynchronous. See comment for some changes to make the parameter updates synchronous 
+Using data parallelism with shared model parameters while updating parameters asynchronous.
 
 Trains a simple denoising autoencoder for 2 epochs on three machines using one parameter server.
+目前多层hidden layers layer-wise pre-training用来initialize weights 然后所有layers joint training的模式只在单机版上实现了。
+在这个Distributed DAE的例子中只使用了一个hidden layer. t2.py中的71-82行因此被comment掉了。时间原因没能解决的问题是： 之前单机版对应的t2.py 在68行运行完成FS_2.LayerTrain（）后其中所定义的所有参数都被抹掉了，所以第76行再次调用 FS_2.LayerTrain（）时就会根据新的para要求重新建立所有参数。
+但在分布式运行中，运行完68行，好像原来的参数不会消失。再次调用FS_2.LayerTrain时76行，会报错，基本是说参数已经存在了，无法修改
 
 A Simple Google Cloud Platform version is detailed as the following 
 
